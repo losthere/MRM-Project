@@ -1,0 +1,332 @@
+SELECT 
+(CASE WHEN 1=2 THEN 'ABC'
+     WHEN 1=3 THEN 'BXXX'
+     ELSE 'AAA'
+     END ) AS OUT
+FROM DUAL;
+------------------------
+SELECT 
+(CASE WHEN MANAGER_ID IS NULL
+THEN 'NO MANAGER'
+end )  
+FROM DUAL;
+
+---------------------------
+
+SELECT CASE WHEN NULL is NULL THEN 1 ELSE 2 END AS OUT FROM DUAL;
+-----NVL , is the first paramter is null, then it will output the second paranter, else the first paramter would be the outputted
+SELECT NVL(1,2) FROM DUAL;
+
+(EMPLOYEE_AGE <30 or employee_age is null) --not gud approach
+NVL(EMPLOYEE_AGE,29)<30;--good approach
+
+SELECT NVL2('A',1,2) FROM DUAL;
+SELECT NVL2(IFTS ITS NULL, SHOW ME 3RD PARAMTER 
+            IFTS ITS NOT NULL, SHOW ME 2RD PARAMTER ;
+            
+SELECT (NULL,1) FROM DUAL;
+----return fist not null value, manadatory 3 paramter
+
+COALESCE(SPOUSE,FATHER_NAME,MOTHERS_NAME,GUARDIAN);  
+EMPLOYEE ---------- SPOUSE,FATHER_NAME,MOTHERS_NAME,GUARDIAN,external_gurfian.........if spouse is null,look for father name,if that is also nulll 
+--look for mother name and so....in this case we coalesce() function
+
+-----10 MILLIONS-------
+SELECT LISTAGG(EMPLOYEE_NAME,'|') within group (order by employee_name) ,city,DEPT_NAME
+from employee
+group by city,dept_name;
+---------------
+SELECT e.*,
+LISTAGG(EMPLOYEE_NAME,'|') within group (order by employee_name) over (partition by city)
+from employee e;
+----------------------
+SELECT * FROM USER_TAB_COLUMNS WHERE TABLE_NAME='EMPLOYEE' order by column_id;
+--------------------
+SELECT e.*,
+ROW_NUMBER() OVER (PARTITION BY CITY order by salary) AS RNUM
+FROM EMPLOYEE e;
+---------------------------
+
+SET OPERATION 
++ - 
+UNION ----------------join two different result set , DISTINCT output
+UNION ALL ----------------IT WONT ELIIMATE DUPLICATES -----33% faster in operation compared to UNION 
+MINUS (A-B)
+
+SELECT EMPLOYEE_NAME AS EMP_NAME, SALARY , 'INDIA-HYD' FROM EMPLOYEE where city='HYD'
+minus
+SELECT eMPLOYEE_NAME ,salary , 'INDIA-HYD' FROM EMPLOYEE where city='HYD';
+
+ -----------2 SAME RECORDS <COLUMN_SET> in table a
+
+table 1
+'ABC',1000,'HYD'
+'ABC',1000,'HYD'
+
+ table 2
+'ABC',1000,'HYD'
+
+table1 minus table2 = 0
+
+ WHATEVER IS THERE IN A but not in b
+and whatever is there in B but not in a
+
+insert into 
+ROW_NUMBER()------analtyical function
+
+  -------IF , CASE , NVL NVL2,NNVLIF,COALESC,ROWNUM---------
+  
+SELECT * FROM 
+(SELECT * FROM EMPLOYEE where city='HYD'
+UNION ALL
+SELECT * FROM EMPLOYEE where city='TEL') A,
+(SELECT * FROM EMPLOYEE where city='HYD1'
+UNION ALL
+SELECT * FROM EMPLOYEE where city='TEL1') b,
+(SELECT * FROM EMPLOYEE where city='HYD1'
+UNION ALL
+SELECT * FROM b where city='TEL1') c,
+ORDER BY SALARY;
+
+------WITH SUBQUERY----------------------------------
+WITH A AS
+(SELECT * FROM EMPLOYEE where city='HYD'
+UNION ALL
+SELECT * FROM EMPLOYEE where city='TEL'),
+B AS
+(SELECT * FROM EMPLOYEE where city='HYD'
+UNION ALL
+SELECT * FROM A),
+c as 
+(SELECT * FROM EMPLOYEE where city='HYD'
+UNION ALL
+SELECT * FROM EMPLOYEE where city='TEL')
+select * from A,b,c where a.=b.;
+----------------------------
+
+PLSQL----- progamming 
+-----------
+---tRANSCATIOn
+SELECT count(*) FROM EMPOYEE where city='HYD';
+SELECT * FROM EMPOYEE where city='TEL';
+
+SET SERVEROUTPUT ON ;
+DECLARE
+  v_salary constant  emp.salary%type :=1000;
+  v_sal emp.salary%type;
+  v_v_salary v_sal%type; -----------variable
+--  C_max_value    ----CONSTANT
+---  p_out -------PARAMTER
+  begin
+  ------one or more alteast one statement should be in between in block
+  null;
+  dbms_output.put_line('hi');----PACKGE.FUNCTION oracle defined chnage
+  end;
+/
+
+-----------ANNONYMOUS BLOCK-----------
+
+NAMED BLOCK
+
+CREATE OR REPLACE PROCEDURE ABC_T1
+AS 
+V_OUT VARCHAR2(200);
+V_cnt number;
+E_INVALID_NAME EXCEPTION;
+BEGIN
+select employee_name  into V_OUT  from employee where city='HYD' and ROWNUM=1;
+
+ select count(*)  into V_cnt  from employee where city='HYD'; 
+ 
+ if V_cnt>1
+then
+raise E_INVALID_NAME;
+end if;
+
+    dbms_output.put_line('this would be printed');----PACKGE.FUNCTION oracle defined chnage
+    dbms_output.put_line('oTPUT IS : ' ||  v_out || ' VAUE');----PACKGE.FUNCTION oracle defined chnage
+  exception
+  WHEN NO_data_found then 
+  dbms_output.put_line('no data foundsssssssss');----PACKGE.FUNCTION oracle defined chnage
+  WHEN E_INVALID_NAME then 
+  dbms_output.put_line('inside user defiened expceptioN');----PACKGE.FUNCTION oracle defined chnage
+  WHEN others then ---------------------- GENERIC EXCEPTION
+    dbms_output.put_line('generic exception occured');----PACKGE.FUNCTION oracle defined chnage
+END;
+/
+
+SET SERVEROUTPUT ON ;
+execute ABC_T1;
+
+PROCEDURE ---------no mandotory RETURN ;  
+FUNCTION --------------mandotory RETURN ;
+
+SELECT ABC('KAUSHAL') from dual;
+UPPER('KssSS') ------- KSSSS
+
+SELECT ABC_T1 FROM DUAL;---Procedure from a SQL query cannot be called;
+
+CREATE OR REPLACE FUNCTION ABC_TST(P_NAME VARCHAR2)
+return varchar2
+AS
+V_OUT_1 VARCHAR2(10);
+V_OUT_2 VARCHAR2(10);
+begin
+SELECT SUBSTR(P_NAME,1,3),SUBSTR(P_NAME,1,5) INTO V_OUT_1,v_out_2 from dual;
+return v_out_2;
+end;
+/
+
+SET SERVEROUTPUT ON ;
+execute ABC_T1;
+
+select abc_tst('KAUSHAL') from dual;----
+
+FUCNTION WHICH WILL INCREASE BY 10
+
+SELECT increas_Salry(10) FROM EMPLOYEE where salAry<10000;-------CANNOT WRITE THE SAME TABLE/COLUMN , WHICH YOU ARE TRYIN TO MODIFY
+
+
+P_OUT ---PROCESS   ---Y
+                   -- N (PROCEDURE, )
+                   
+  PACKAGE------------is a collection of procedure and fucntion
+  --CODING PACKAGE------
+  
+  PROCEDURE CHECK THE VALIDATION
+  PROCEDURE LOCATION ASSIGNMENT
+  PROCEDURE USER LOCATION
+  
+  CREATE OR REPLACE PACKAGE TEST_cODING ---specification
+  (
+    V_GLOVBAL_EMPID NUMBER;---------------
+	PROCEDURE CHECK THE VALIDATION;
+--  PROCEDURE LOCATION ASSIGMNEnt
+--  PROCEDURE USER LOCATION ;
+  ) ; -------DECLARATION 
+  
+  CREATE OR REPLACE PACKAGE BODY TEST_CODING--defination
+  (
+  V_GLOVBAL_magerid NUMBER;---------------
+   
+  PROCEDURE CHECK THE VALIDATION()
+  BEGIN 
+  LOCATION();
+  USER_ASSSIGMENT();
+  END;
+  
+  PROCEDURE CHECK THE LOCATION()
+  BEGIN 
+  NULL;
+  END;
+  
+  PROCEDURE CHECK THE ASSIGMNEnt()
+  BEGIN 
+  NULL;
+  END;
+  )
+
+A package will have two mandatory parts −
+
+Package specification
+Package body or definition
+
+Package Specification
+The specification is the interface to the package. It just DECLARES the types, variables, constants, exceptions, cursors, and subprograms that can be referenced from outside the package. 
+All objects placed in the specification are called public objects. Any subprogram not in the package specification but coded in the package body is called a private object.
+
+Package Body
+The package body has the codes for various methods declared in the package specification and other private declarations, which are hidden from the code outside the package.
+
+
+####################################################################################################################################################
+ 
+Oracle (and PostgreSQL) have:
+
+%TYPE
+%ROWTYPE
+%TYPE
+%TYPE is used to declare variables with relation to the data type of a column in an existing table:
+
+DECLARE v_id ORDERS.ORDER_ID%TYPE
+The benefit here is that if the data type changes, the variable data type stays in sync.
+
+Reference: http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14261/fundamentals.htm#i6080
+
+%ROWTYPE
+This is used in cursors to declare a single variable to contain a single record from the resultset of a cursor or table without needing to specify individual variables (and their data types). Ex:
+
+DECLARE
+  CURSOR c1 IS
+     SELECT last_name, salary, hire_date, job_id 
+       FROM employees 
+      WHERE employee_id = 120;
+
+  -- declare record variable that represents a row fetched from the employees table
+  employee_rec c1%ROWTYPE; 
+
+BEGIN
+ -- open the explicit cursor and use it to fetch data into employee_rec
+ OPEN c1;
+ FETCH c1 INTO employee_rec;
+ DBMS_OUTPUT.PUT_LINE('Employee name: ' || employee_rec.last_name);
+END;
+/
+###################################################################################################################################################### 
+  
+  
+  
+----------CHASE FILE----------
+MEMBER/PROVIDER-- and all aditional details
+
+HDR|MCARE|||||----header(this info is stored in one table)
+DTL|MEMBER_PROVIDER|--(DTL info is stored in another table)
+DTL|MEMBER_PROVIDER
+DTL|MEMBER_PROVIDER
+DTL|MEMBER_PROVIDER
+DTL|MEMBER_PROVIDER
+DTL|MEMBER_PROVIDER
+DTL|MEMBER_PROVIDER
+----------------------------(Trailer info is not stored anywhere)
+cur_project -----header vadiation 
+cur_proj_content---DTL level validation
+
+
+
+
+LANDING -ZONE /GCM/PROC/IN
+
+SELECT * FROM FRMK_BATCH_JOB;
+select * from frmk_batch_job_param where seq_batch_id=30;
+
+
+GCMC001_001I----------- (Invoking)--------cntl , load in a staging........
+GCMC001_002P-----------(Processing)--valdiation and loading from staging to main table
+GCMC001_003R--------------(Recon)--give the brief stat of how many row failed, and why it failed and how many passed
+
+the above steps are performed in sequential order
+
+SELECT * FROM STG_PROJECT; ------------------ GCM_PROJECT()
+SELECT * FROM STG_PROJ_content;---------------GCM_PROJ_CONTENT()
+SELECT * FROM FRMK_STG_FILEINFO;
+
+FRMK_STG_FILEINFO-entry point for file -incoming/outgoing file recorded
+frmk_process_status-status of file(fle_rcvd,ready_to_stage,staging error,etc)
+staging error-may be beacuse of problm in stageing table or in file
+recon-telling file sender that this file has error,take care of it
+
+outbound-we are sending the files
+
+2------loaded
+4----success
+6---failure
+21--exception occured
+
+select * from frmk_process_status;
+select * from gcm_db_log order by log_time desc;
+select * from gcm_chase_file;---UTILTY TAB----------
+
+10000 BARCODES ----------1 PASSED 9999 FAILED
+9999 FAILE--- 1 BARCODE--------------1
+
+-----------------cursor is just a query defination ------------

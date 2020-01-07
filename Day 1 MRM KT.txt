@@ -1,0 +1,123 @@
+UHG's whole income comes mostly from MEDICARE. People have to buy policies from govt by paying some minimal charges.
+
+to avoid hefty penalty (which needs to be given to the CMS(govt body which checks the claim history information) when any payer gets caught in some false claim reimbursement )and get the maximum bill paid from the govt we do cross checking-
+
+MRM KT
+
+Objective of MRM-CMS/HHS reimbursement maximised and validation
+
+codes are given for
+1. Diagnosis-Dx codes
+2.Procedure -Procedural codes
+3.Service Codes-
+
+medicare-old
+medicaid-poor
+
+ID-member-provider ID - different for each member provider combination
+hic - health plan unique id
+chart request id(bar code)- used and recognised in all other business services.
+encounter + dollar =claim
+
+
+functioning of MRM-
+main job is getting start file(dat file-pipe delimited data)+detailed file(dat file-pipe delimited data)+prescription chart(which get assigned to resources within uhg or to 3rd party to convert this pdf file into pipe delimited data)
+start file is overview data and detailed file contains the detailed information.Both files are connected using a key.(that key is present inside start file and the detailed file is name using that key).
+start file detailed file contains information related to member provider payer. Each provider and member is given a unique alphanumeric number which is very important.It is used in later business processes.These start and detailed files are placed in landingzone where batch job is already running
+Whenever a new start and detailed files are processed, a new row of data is included in table.This is called project which has a project key.
+That project can be new,assigned,extracted,etc. This status for a project can be assigned using UI also.
+
+How do we get prescription??
+MRM hires a retrieval vendor. We provide him with provider member information.He goes to different providers and asks for prescription. He gives us that prescription chart(this can be hand written also). We extract information from that into pipe delimited data and run a batch job on it.And hence that info is loaded into our system.
+It may happen that provider does not provide the data. In that case the payer connects to provider why he is not giving the prescription chart to retrieving vendor.
+
+the dat file contains 
+there is one main job and 4 business services-
+4 business services-1.coding 2.SLR   3.CV(important,revenue generator for MRM)    4.CVQA
+These are step wise business processes. Output from lower 1st step goes to 2nd and so on. Also once a resource does one business process he can not do other bussiness process. For each business we need to assign resources.
+
+exchanging data between different business processes is back and forth process which makes it complicated.
+
+1.Coding-we match details from prescription chart and insert data into coding form. If NPI is not know we give 8888888888 or 9999999999. Backend job will find the details from start and detailed files the corresponding NPI(using other provider info). A coder can escalate a project giving one of the many reasons like prescription chart image is not clear OR member duplicate etc. The project escalted will then go to immediate superviser where he will reject or accept the reason.If he accepts he resolves the issue realted to the project.
+
+2.SLR-This step is to verify the coding result. There can be 3 ways-a)RECODE b)Suspect Analysis   c)PFA something
+a)If RECODE-then the team to which this SLR task is assigned have to recode again. Then some matching is performed between the iitially coded o/p and this cureent one. 
+b)If  Suspect Analysis  -then some info from the coding(Dx codes-HCC codes) are provided. And verification is done one the basis of that.
+c)PAF  Rejected-This is related to prospective(diagnosis is given by seeing the symptoms which saves the cost of treatment of fatal disease and then asking for claims).   ???--not so sure
+
+Chart Review and Hospital Chart Review are Retrospective and PAF is prospective.
+Hospital Chart review(Inpatient) and Chart Review(Outpatient) are same except for differnt in number of a few columns. Form is same for both. 
+SLR file is again loaded into landingzone
+
+3)CV-Checks if the HCCs are valid and if the HCCs are not supported within the chart are marked for delete.
+
+4)CVQA-Sees if the HCCs documented marked valid by CV are correct or not using data from CornerStone,EDPS,etc. And then report is sent.
+
+CV acts as a source of truth. It may happen that Payer pays for a fraud claim.It can be a mistake of the provider or the payer.CMS audits the data of every transaction done by the payer.CMS does not have data related to every provider that comes under that payer. However MRM have the provider and payer details.(We go to every provider that UHG has a contract with(We dont do the same for commercial clients)).We make that mock audit that the payer has made. Now we compare using the two audits the fraud transactions done by the payer.
+
+retrieval vendor ni h commercial me
+extra process in commercial is normalization(hyd,hyderabad-Changes to one universal name..for example HYD)
+
+emr ui upload
+onsite ui upload
+
+
+what happens when the supervisor disagress to an escalation?
+what is queue coding?
+
+
+commercial-no concept of commercial vendor
+provider-ciox-ciox loading in our system
+
+outreach,onsite,EMR
+outreach-charts which are like fax-fax kr dete
+onsite-they wont send us the chart by themselves,go to them and scan from their end by ourselves
+
+
+coding-
+location assignment-gcm_vendor
+user assignment-
+
+
+chase file-member provider info
+
+policy holder-person holding policy
+
+encounter-is just DOS
+encounterDx table-contains Dx tables
+
+client-insurance company
+
+Remember 5 tables(member,provider,cross...,encounter,encounterDx)
+projcontentTable-
+epsilon,gamma??
+CPC id we need to diaplay in subtype1
+
+-------------------------------------------------------------------------------------------------
+CPC-optum
+CRP(Clinical Review Platform)-Commercial
+NUQA-new and unique QA(Quality Assurance)
+There are several types QA. NUQA is one them which is done on top of QA. QA is done by Optum and NUQA is done by anthem(client)
+
+Workitem = barcode + DOS 
+
+chart ops team uses epsilon tool and gamma tool. chart ops team does coding and the result is pulled by epsilon.Then epsilon validates if it new and unique or not.
+		If YES ,then NUQA is performed by Gamma. After this they are assigned status valid/invalid and the result is sent back to the epsilon.
+
+		If NO ,then it is flagged as non NUQA.
+
+Now the results from both gamma and epsilon are refreshed.
+
+The refreshed data from epsilon is retrieved by batch job and loaded into CPC.Now validation is performed on epsilon results to identify eligible records. Now the eligible records are loaded into CRP.
+-----------------------------------------------------------------------------------------------------------
+There are 3 roles - NUQA Auditor,NUQA Optum Auditor and NUQA sr auditor
+-----------------------------------------------------------------------------------------------------------
+RAPS Data - Risk Adjustment
+This data comes from cornerstone.
+
+
+
+
+
+
+

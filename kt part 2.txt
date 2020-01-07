@@ -1,0 +1,10 @@
+from the inbound file the workitems are shown in unassigned state(new status).
+We go to assignment tab and assign those to some commercial users. Now the user will start working(give the retrieval info(when u have saved as draft it will be in progress status)) on it. If he finds any issue with the data he will click on pend appointment(pend status).It will go to pend manager and he will resolve the issue and realaese that workitem(pend relaese).Now the commercial user can again start working on it.He makes an appointment where he has to give time and date for the vendor to visit the provider.Once he is done he can click on finish button. Now the status will change to Scheduled.Now the vendor have to go the provider and get the charts from the provider. If the due date has passed,status changes to PastDue.
+
+new-unassigned
+assigned
+inprogress-----(pend -->pend release)
+scheduled
+past due(when the vendor could get the chart from the provider)
+
+retrieval info--provider info
